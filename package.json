@@ -16,6 +16,7 @@
     "pdfjs-dist": "^6.1.200",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-dropzone": "^19.1.0",
     "react-router": "8.0.0",
     "tailwind-merge": "^3.6.0",
     "zustand": "^5.0.14"
