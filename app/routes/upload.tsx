@@ -54,9 +54,7 @@ const Upload = () => {
 
         const feedbackText = typeof feedback.message.content === 'string'
             ? feedback.message.content
-            : feedback.message.content.find((item: any) => item.type === 'text')?.text;
-
-        if (!feedbackText) return setStatusText('Error: AI response contained no text content');
+            : feedback.message.content[0].text;
 
         data.feedback = JSON.parse(feedbackText);
         await kv.set(`resume:${uuid}`, JSON.stringify(data));
