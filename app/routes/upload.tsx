@@ -50,13 +50,48 @@ const Upload = () => {
             uploadedFile.path,
             prepareInstructions({ jobTitle, jobDescription })
         )
-        if (!feedback) return setStatusText('Error: Failed to analyze resume');
+        console.log('Raw AI feedback response:', feedback);
 
-        const feedbackText = typeof feedback.message.content === 'string'
-            ? feedback.message.content
-            : feedback.message.content[0].text;
+        if (!feedback || !feedback.message || !feedback.message.content) {
+            console.error('Malformed feedback response:', feedback);
+            return setStatusText('Error: Failed to analyze resume');
+        }
 
-        data.feedback = JSON.parse(feedbackText);
+        let feedbackText: string | undefined;
+
+        if (typeof feedback.message.content === 'string') {
+            feedbackText = feedback.message.content;
+        } else if (Array.isArray(feedback.message.content)) {
+            console.log('Content blocks:', JSON.stringify(feedback.message.content, null, 2));
+            const textBlock = feedback.message.content.find(
+                (block: any) => block?.type === 'text' && typeof block.text === 'string'
+            );
+            feedbackText = textBlock?.text;
+        }
+
+        if (!feedbackText) {
+            console.error('No text found in feedback content:', feedback.message.content);
+            return setStatusText('Error: AI did not return usable feedback text');
+        }
+
+        let cleanedText = feedbackText.trim();
+if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/```\s*$/, '')
+        .trim();
+        }
+
+        try {
+            data.feedback = JSON.parse(cleanedText);
+        } catch (err) {
+            console.error('Failed to parse feedback JSON.');
+            console.error('Error:', err);
+            console.error('Text length:', cleanedText.length);
+            console.error('Last 100 chars:', cleanedText.slice(-100));
+            console.error('Full raw text was:', cleanedText);
+            return setStatusText('Error: Could not parse AI feedback response');
+        }
         await kv.set(`resume:${uuid}`, JSON.stringify(data));
         setStatusText('Analysis complete, redirecting...');
         console.log(data);
