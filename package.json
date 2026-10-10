@@ -9,6 +9,7 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@netlify/vite-plugin-react-router": "^4.0.0",
     "@react-router/node": "8.0.0",
     "@react-router/serve": "8.0.0",
     "clsx": "^2.1.1",
